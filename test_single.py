@@ -2,11 +2,13 @@ import os
 import random
 from argparse import ArgumentParser
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
+from PIL import Image
 
 from model.networks import Generator
 from utils.tools import get_config, random_bbox, mask_image, is_image_file, default_loader, normalize, get_model_list
@@ -56,6 +58,12 @@ def main():
                     # Test a single masked image with a given mask
                     x = default_loader(args.image)
                     mask = default_loader(args.mask)
+                    unique_colors = set(tuple(v) for m2d in np.asarray(mask) for v in m2d)
+                    mapping = {}
+                    for color in unique_colors:
+                        mapping[color] = 255 if color == (0, 0, 142) else 0
+
+                    mask = transforms.Lambda(lambda x: change_mask_color_mapping(x, (0, 0, 142)))(mask)
                     x = transforms.Resize(config['image_shape'][:-1])(x)
                     x = transforms.CenterCrop(config['image_shape'][:-1])(x)
                     mask = transforms.Resize(config['image_shape'][:-1])(mask)
@@ -116,6 +124,18 @@ def main():
     except Exception as e:  # for unexpected error logging
         print("Error: {}".format(e))
         raise e
+
+
+def change_mask_color_mapping(mask, masked_color):
+    mask = np.asarray(mask).copy()
+    for r in range(mask.shape[:-1][0]):
+        for c in range(mask.shape[:-1][1]):
+            if np.array_equal(mask[r][c], np.array(masked_color)):
+                mask[r][c] = (255, 255, 255)
+            else:
+                mask[r][c] = (0, 0, 0)
+
+    return Image.fromarray(mask)
 
 
 if __name__ == '__main__':
