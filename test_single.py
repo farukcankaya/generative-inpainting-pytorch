@@ -11,7 +11,6 @@ import torchvision.utils as vutils
 from model.networks import Generator
 from utils.tools import get_config, random_bbox, mask_image, is_image_file, default_loader, normalize, get_model_list
 
-
 parser = ArgumentParser()
 parser.add_argument('--config', type=str, default='configs/config.yaml',
                     help="training configuration")
@@ -22,6 +21,7 @@ parser.add_argument('--output', type=str, default='output.png')
 parser.add_argument('--flow', type=str, default='')
 parser.add_argument('--checkpoint_path', type=str, default='')
 parser.add_argument('--iter', type=int, default=0)
+
 
 def main():
     args = parser.parse_args()
@@ -50,7 +50,7 @@ def main():
     print("Configuration: {}".format(config))
 
     try:  # for unexpected error logging
-        with torch.no_grad():   # enter no grad context
+        with torch.no_grad():  # enter no grad context
             if is_image_file(args.image):
                 if args.mask and is_image_file(args.mask):
                     # Test a single masked image with a given mask
@@ -91,7 +91,8 @@ def main():
                 netG = Generator(config['netG'], cuda, device_ids)
                 # Resume weight
                 last_model_name = get_model_list(checkpoint_path, "gen", iteration=args.iter)
-                netG.load_state_dict(torch.load(last_model_name))
+                device_location = None if cuda else torch.device('cpu')  # By default (which is the map_location=None case), GPU is enabled
+                netG.load_state_dict(torch.load(last_model_name, map_location=device_location))
                 model_iteration = int(last_model_name[-11:-3])
                 print("Resume from {} at iteration {}".format(checkpoint_path, model_iteration))
 
