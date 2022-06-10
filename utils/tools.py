@@ -204,7 +204,7 @@ def spatial_discounting_mask(config):
     else:
         mask_values = np.ones(shape)
     spatial_discounting_mask_tensor = torch.tensor(mask_values, dtype=torch.float32)
-    if config['cuda']:
+    if torch.cuda.is_available():
         spatial_discounting_mask_tensor = spatial_discounting_mask_tensor.cuda()
     return spatial_discounting_mask_tensor
 

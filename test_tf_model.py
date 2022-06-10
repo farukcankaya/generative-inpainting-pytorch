@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 def main():
     config = get_config(args.config)
-    if config['cuda']:
+    if torch.cuda.is_available():
         device = torch.device("cuda:{}".format(config['gpu_ids'][0]))
     else:
         device = torch.device("cpu")

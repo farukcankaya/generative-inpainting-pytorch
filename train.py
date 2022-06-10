@@ -26,7 +26,7 @@ def main():
     config = get_config(args.config)
 
     # CUDA configuration
-    cuda = config['cuda']
+    cuda = torch.cuda.is_available()
     device_ids = config['gpu_ids']
     if cuda:
         os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)

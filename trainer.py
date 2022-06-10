@@ -15,7 +15,7 @@ class Trainer(nn.Module):
     def __init__(self, config):
         super(Trainer, self).__init__()
         self.config = config
-        self.use_cuda = self.config['cuda']
+        self.use_cuda = torch.cuda.is_available()
         self.device_ids = self.config['gpu_ids']
 
         self.netG = Generator(self.config['netG'], self.use_cuda, self.device_ids)
